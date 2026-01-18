@@ -52,7 +52,7 @@ class _StudentAppState extends State<StudentApp> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: AppBackground(
@@ -88,7 +88,7 @@ class _StudentAppState extends State<StudentApp> {
               default:
                 break;
             }
-            
+
             // Return main navigation screens
             return _screens[_selectedIndex];
           },
@@ -125,60 +125,64 @@ class _StudentAppState extends State<StudentApp> {
                 ),
               ),
             ),
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 12.0, top: 8),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: List.generate(_navItems.length, (index) {
-                  final isSelected = _selectedIndex == index;
-                  final item = _navItems[index];
-                  final tealColor = const Color(0xFF14B8A6);
-                  
-                  return GestureDetector(
-                    onTap: () => setState(() => _selectedIndex = index),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(14),
-                        color: isSelected
-                            ? tealColor.withOpacity(0.22)
-                            : Colors.transparent,
-                        border: isSelected
-                            ? Border.all(
-                                color: tealColor.withOpacity(0.4),
-                                width: 1.2,
-                              )
-                            : null,
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            item['icon'],
-                            color: isSelected ? tealColor : Colors.grey[400],
-                            size: 24,
-                          ),
-                          const SizedBox(height: 5),
-                          Text(
-                            item['label'],
-                            style: TextStyle(
-                              fontSize: 10,
-                              fontWeight: isSelected
-                                  ? FontWeight.w700
-                                  : FontWeight.w500,
-                              color: isSelected ? tealColor : Colors.grey[500],
-                              letterSpacing: 0.3,
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 4.0, top: 8),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(_navItems.length, (index) {
+                    final isSelected = _selectedIndex == index;
+                    final item = _navItems[index];
+                    final tealColor = const Color(0xFF14B8A6);
+
+                    return GestureDetector(
+                      onTap: () => setState(() => _selectedIndex = index),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 10,
+                        ),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(14),
+                          color: isSelected
+                              ? tealColor.withOpacity(0.22)
+                              : Colors.transparent,
+                          border: isSelected
+                              ? Border.all(
+                                  color: tealColor.withOpacity(0.4),
+                                  width: 1.2,
+                                )
+                              : null,
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              item['icon'],
+                              color: isSelected ? tealColor : Colors.grey[400],
+                              size: 24,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 5),
+                            Text(
+                              item['label'],
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
+                                color:
+                                    isSelected ? tealColor : Colors.grey[500],
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                }),
+                    );
+                  }),
+                ),
               ),
             ),
           ),
