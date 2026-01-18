@@ -188,7 +188,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Text(
                     'Shikshanam eCampus • Powered by BisKIRAN',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.white.withOpacity(0.8),
+                          color: isDark
+                              ? Colors.white.withOpacity(0.8)
+                              : const Color(0xFF64748b),
                           fontWeight: FontWeight.w600,
                         ),
                   ),
@@ -227,10 +229,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     Text(
                       'Shikshanam eCampus',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w800,
-                          ),
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -242,33 +245,114 @@ class _HomeScreenState extends State<HomeScreen> {
                   ],
                 ),
                 const Spacer(),
-                IconButton(
-                  onPressed: () {
-                    Provider.of<AppState>(context, listen: false)
-                        .navigateTo(StudentPage.notifications);
-                  },
-                  icon: const Icon(Icons.notifications_outlined, color: Colors.white),
-                  tooltip: 'Notifications',
+                // Theme Toggle Button
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      Provider.of<AppState>(context, listen: false)
+                          .toggleDarkMode();
+                    },
+                    icon: Icon(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Icons.light_mode_rounded
+                          : Icons.dark_mode_rounded,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? const Color(0xFFFBBF24)
+                          : Colors.white,
+                    ),
+                    tooltip: Theme.of(context).brightness == Brightness.dark
+                        ? 'Switch to Light Mode'
+                        : 'Switch to Dark Mode',
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Notifications Button
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.white.withOpacity(0.2),
+                      width: 1,
+                    ),
+                  ),
+                  child: IconButton(
+                    onPressed: () {
+                      Provider.of<AppState>(context, listen: false)
+                          .navigateTo(StudentPage.notifications);
+                    },
+                    icon: const Icon(Icons.notifications_outlined,
+                        color: Colors.white),
+                    tooltip: 'Notifications',
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 14),
-            GlassmorphicCard(
-              borderRadius: 16,
-              blur: 12,
-              opacity: 0.24,
+            Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: isDark ? Colors.white.withOpacity(0.1) : Colors.white,
+                boxShadow: isDark
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: const Color(0xFF2563eb).withOpacity(0.1),
+                          blurRadius: 12,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                border: Border.all(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.15)
+                      : const Color(0xFF2563eb).withOpacity(0.2),
+                  width: 1.5,
+                ),
+              ),
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search subjects, notes, tests...',
                   hintStyle: TextStyle(
-                    color: Colors.white.withOpacity(0.9),
-                    fontWeight: FontWeight.w600,
+                    color: isDark
+                        ? Colors.white.withOpacity(0.7)
+                        : const Color(0xFF94a3b8),
+                    fontWeight: FontWeight.w500,
                   ),
-                  prefixIcon: const Icon(Icons.search, color: Colors.white),
+                  prefixIcon: Icon(
+                    Icons.search,
+                    color: isDark ? Colors.white : const Color(0xFF2563eb),
+                  ),
+                  suffixIcon: Container(
+                    margin: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.white.withOpacity(0.1)
+                          : const Color(0xFF2563eb).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      Icons.tune,
+                      size: 18,
+                      color: isDark ? Colors.white70 : const Color(0xFF2563eb),
+                    ),
+                  ),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                 ),
-                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                style: TextStyle(
+                  color: isDark ? Colors.white : const Color(0xFF0f172a),
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -279,9 +363,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildStatsRow(BuildContext context) {
     final stats = [
-      {'label': 'Streak', 'value': '12 days', 'icon': Icons.local_fire_department, 'color': const Color(0xFFfb923c)},
-      {'label': 'Accuracy', 'value': '86%', 'icon': Icons.check_circle_outline, 'color': const Color(0xFF22c55e)},
-      {'label': 'Tests', 'value': '48', 'icon': Icons.assignment_turned_in, 'color': const Color(0xFF38bdf8)},
+      {
+        'label': 'Streak',
+        'value': '12 days',
+        'icon': Icons.local_fire_department,
+        'color': const Color(0xFFfb923c)
+      },
+      {
+        'label': 'Accuracy',
+        'value': '86%',
+        'icon': Icons.check_circle_outline,
+        'color': const Color(0xFF22c55e)
+      },
+      {
+        'label': 'Tests',
+        'value': '48',
+        'icon': Icons.assignment_turned_in,
+        'color': const Color(0xFF38bdf8)
+      },
     ];
 
     return Row(
@@ -305,7 +404,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               width: 34,
                               height: 34,
                               decoration: BoxDecoration(
-                                color: (stat['color'] as Color).withOpacity(0.18),
+                                color:
+                                    (stat['color'] as Color).withOpacity(0.18),
                                 shape: BoxShape.circle,
                               ),
                               child: Icon(
@@ -320,18 +420,26 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 8),
                         Text(
                           stat['value'] as String,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w800,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white
+                                        : const Color(0xFF0f172a),
+                                    fontWeight: FontWeight.w800,
+                                  ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           stat['label'] as String,
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.white.withOpacity(0.7),
-                                fontWeight: FontWeight.w600,
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    color: Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white.withOpacity(0.7)
+                                        : const Color(0xFF64748b),
+                                    fontWeight: FontWeight.w600,
+                                  ),
                         ),
                       ],
                     ),
@@ -346,7 +454,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildQuickActions(BuildContext context) {
     final appState = Provider.of<AppState>(context);
-    
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     final actions = [
       {
         'label': 'Leaderboard',
@@ -369,7 +478,7 @@ class _HomeScreenState extends State<HomeScreen> {
         'onTap': () {},
       },
     ];
-    
+
     return SizedBox(
       height: 70,
       child: ListView.separated(
@@ -385,16 +494,18 @@ class _HomeScreenState extends State<HomeScreen> {
               blur: 10,
               opacity: 0.16,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(action['icon'] as IconData, color: Colors.white),
+                    Icon(action['icon'] as IconData,
+                        color: isDark ? Colors.white : const Color(0xFF2563eb)),
                     const SizedBox(width: 8),
                     Text(
                       action['label'] as String,
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: isDark ? Colors.white : const Color(0xFF0f172a),
                         fontWeight: FontWeight.w700,
                       ),
                     ),
@@ -410,7 +521,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildSubjectsGrid(BuildContext context) {
     final appState = Provider.of<AppState>(context);
-    
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -467,7 +578,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.white,
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? Colors.white
+                          : const Color(0xFF0f172a),
                       fontWeight: FontWeight.w600,
                       fontSize: 11,
                     ),
@@ -480,10 +593,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildSectionTitle(BuildContext context, String title) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
       title,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            color: Colors.white,
+            color: isDark ? Colors.white : const Color(0xFF0f172a),
             fontWeight: FontWeight.w800,
           ),
     );
@@ -491,7 +605,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildModuleCard(BuildContext context, Map<String, dynamic> module) {
     final appState = Provider.of<AppState>(context);
-    
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 10),
       child: GestureDetector(
@@ -531,10 +645,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Text(
                         '${module['id']} ${module['title']}',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w800,
-                            ),
+                        style:
+                            Theme.of(context).textTheme.titleMedium?.copyWith(
+                                  color: Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.white
+                                      : const Color(0xFF0f172a),
+                                  fontWeight: FontWeight.w800,
+                                ),
                       ),
                       const SizedBox(height: 6),
                       Row(
@@ -542,24 +660,31 @@ class _HomeScreenState extends State<HomeScreen> {
                           _buildMetaChip(
                             Icons.book_outlined,
                             '${module['notes']}',
-                            onTap: () => appState.navigateTo(StudentPage.notesViewer),
+                            onTap: () =>
+                                appState.navigateTo(StudentPage.notesViewer),
                           ),
                           _buildMetaChip(
                             Icons.ondemand_video,
                             '${module['videos']}',
-                            onTap: () => appState.navigateTo(StudentPage.videoPlayer),
+                            onTap: () =>
+                                appState.navigateTo(StudentPage.videoPlayer),
                           ),
                           _buildMetaChip(
                             Icons.quiz_outlined,
                             '${module['tests']}',
-                            onTap: () => appState.navigateTo(StudentPage.testTaking),
+                            onTap: () =>
+                                appState.navigateTo(StudentPage.testTaking),
                           ),
                         ],
                       ),
                     ],
                   ),
                 ),
-                const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white70),
+                Icon(Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white70
+                        : const Color(0xFF94a3b8)),
               ],
             ),
           ),
@@ -569,6 +694,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildMetaChip(IconData icon, String label, {VoidCallback? onTap}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: GestureDetector(
@@ -576,18 +702,22 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.12),
+            color: isDark
+                ? Colors.white.withOpacity(0.12)
+                : const Color(0xFF2563eb).withOpacity(0.1),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: Colors.white, size: 16),
+              Icon(icon,
+                  color: isDark ? Colors.white : const Color(0xFF2563eb),
+                  size: 16),
               const SizedBox(width: 6),
               Text(
                 label,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: isDark ? Colors.white : const Color(0xFF2563eb),
                   fontWeight: FontWeight.w700,
                   fontSize: 12,
                 ),
@@ -604,77 +734,207 @@ class _HomeScreenState extends State<HomeScreen> {
       {
         'title': 'Nasu Live Copy Checking',
         'subtitle': 'Live session replay',
+        'duration': '45:30',
         'color': const Color(0xFF2563eb),
+        'image': 'images/video_live_checking.png',
       },
       {
         'title': 'GS Rapid Revision',
         'subtitle': '50 mins • Teacher: Bini',
+        'duration': '50:00',
         'color': const Color(0xFFf97316),
+        'image': 'images/video_rapid_revision.png',
       },
     ];
 
     return SizedBox(
-      height: 170,
+      height: 200,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: items.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        separatorBuilder: (_, __) => const SizedBox(width: 14),
         itemBuilder: (context, index) {
           final item = items[index];
           return GestureDetector(
             onTap: () => Provider.of<AppState>(context, listen: false)
                 .navigateTo(StudentPage.videoPlayer),
             child: SizedBox(
-              width: 220,
-              child: GlassmorphicCard(
-                borderRadius: 18,
-                blur: 12,
-                opacity: 0.18,
-                child: Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18),
-                    gradient: LinearGradient(
-                      colors: [
-                        (item['color'] as Color).withOpacity(0.32),
-                        (item['color'] as Color).withOpacity(0.18),
-                      ],
+              width: 280,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Video Thumbnail
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: (item['color'] as Color).withOpacity(0.3),
+                            blurRadius: 12,
+                            offset: const Offset(0, 6),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            // Thumbnail image
+                            Image.asset(
+                              item['image'] as String,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        (item['color'] as Color)
+                                            .withOpacity(0.8),
+                                        (item['color'] as Color)
+                                            .withOpacity(0.5),
+                                      ],
+                                    ),
+                                  ),
+                                  child: const Icon(
+                                    Icons.play_circle_outline,
+                                    color: Colors.white,
+                                    size: 50,
+                                  ),
+                                );
+                              },
+                            ),
+                            // Gradient overlay
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withOpacity(0.6),
+                                  ],
+                                  stops: const [0.4, 1.0],
+                                ),
+                              ),
+                            ),
+                            // Play button
+                            Center(
+                              child: Container(
+                                width: 56,
+                                height: 56,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.95),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 12,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.play_arrow_rounded,
+                                  color: item['color'] as Color,
+                                  size: 34,
+                                ),
+                              ),
+                            ),
+                            // Duration badge
+                            Positioned(
+                              top: 10,
+                              right: 10,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.75),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  item['duration'] as String,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Live indicator for first item
+                            if (index == 0)
+                              Positioned(
+                                top: 10,
+                                left: 10,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFef4444),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        width: 6,
+                                        height: 6,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.white,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 4),
+                                      const Text(
+                                        'REPLAY',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                  padding: const EdgeInsets.all(14),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.play_arrow, color: Colors.white),
-                      ),
-                      const Spacer(),
-                      Text(
-                        item['title'] as String,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        item['subtitle'] as String,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.85),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 10),
+                  // Title
+                  Text(
+                    item['title'] as String,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : const Color(0xFF0f172a),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                    ),
                   ),
-                ),
+                  const SizedBox(height: 2),
+                  // Subtitle
+                  Text(
+                    item['subtitle'] as String,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: isDark
+                          ? Colors.white.withOpacity(0.7)
+                          : const Color(0xFF64748b),
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
               ),
             ),
           );
@@ -685,13 +945,25 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildPodcasts(BuildContext context, bool isDark) {
     final items = [
-      {'title': 'Daily GK Bytes', 'duration': '12 min'},
-      {'title': 'Economy Deep Dive', 'duration': '18 min'},
-      {'title': 'Nepal History Flash', 'duration': '9 min'},
+      {
+        'title': 'Daily GK Bytes',
+        'duration': '12 min',
+        'image': 'images/podcast_gk_bytes.png'
+      },
+      {
+        'title': 'Economy Deep Dive',
+        'duration': '18 min',
+        'image': 'images/podcast_economy.png'
+      },
+      {
+        'title': 'Nepal History Flash',
+        'duration': '9 min',
+        'image': 'images/podcast_history.png'
+      },
     ];
 
     return SizedBox(
-      height: 130,
+      height: 180,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: items.length,
@@ -702,56 +974,123 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () => Provider.of<AppState>(context, listen: false)
                 .navigateTo(StudentPage.notesViewer),
             child: SizedBox(
-              width: 150,
-              child: GlassmorphicCard(
-                borderRadius: 16,
-                blur: 12,
-                opacity: 0.18,
-                child: Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(16),
-                    gradient: LinearGradient(
-                      colors: [
-                        const Color(0xFF2563eb).withOpacity(0.22),
-                        const Color(0xFF7c3aed).withOpacity(0.18),
-                      ],
+              width: 140,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Thumbnail Image
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(14),
+                        boxShadow: [
+                          BoxShadow(
+                            color: isDark
+                                ? Colors.black.withOpacity(0.3)
+                                : Colors.black.withOpacity(0.1),
+                            blurRadius: 8,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(14),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.asset(
+                              item['image'] as String,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        const Color(0xFF2563eb)
+                                            .withOpacity(0.8),
+                                        const Color(0xFF7c3aed)
+                                            .withOpacity(0.8),
+                                      ],
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.mic,
+                                    color: Colors.white,
+                                    size: 40,
+                                  ),
+                                );
+                              },
+                            ),
+                            // Play overlay
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withOpacity(0.5),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            // Play button
+                            Center(
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.9),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.play_arrow_rounded,
+                                  color: Color(0xFF7c3aed),
+                                  size: 26,
+                                ),
+                              ),
+                            ),
+                            // Duration badge
+                            Positioned(
+                              bottom: 8,
+                              right: 8,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.7),
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                                child: Text(
+                                  item['duration'] as String,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Container(
-                        width: 46,
-                        height: 46,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white.withOpacity(0.18),
-                        ),
-                        child: const Icon(Icons.mic, color: Colors.white),
-                      ),
-                      const SizedBox(height: 10),
-                      Text(
-                        item['title'] as String,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 13,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        item['duration'] as String,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.75),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 8),
+                  // Title
+                  Text(
+                    item['title'] as String,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: isDark ? Colors.white : const Color(0xFF0f172a),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           );

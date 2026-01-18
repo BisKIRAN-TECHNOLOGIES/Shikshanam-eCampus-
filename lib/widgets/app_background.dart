@@ -8,19 +8,33 @@ class AppBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF0b1024),
-            Color(0xFF0f162c),
-            Color(0xFF151b30),
-            Color(0xFF1a0f3a),
-          ],
-          stops: [0.0, 0.38, 0.68, 1.0],
-        ),
+      decoration: BoxDecoration(
+        gradient: isDark
+            ? const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFF0b1024),
+                  Color(0xFF0f162c),
+                  Color(0xFF151b30),
+                  Color(0xFF1a0f3a),
+                ],
+                stops: [0.0, 0.38, 0.68, 1.0],
+              )
+            : const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white,
+                  Color(0xFFF8FAFC),
+                  Color(0xFFF1F5F9),
+                  Colors.white,
+                ],
+                stops: [0.0, 0.38, 0.68, 1.0],
+              ),
       ),
       child: Stack(
         children: [
@@ -28,7 +42,9 @@ class AppBackground extends StatelessWidget {
             top: -140,
             right: -80,
             child: _GlowCircle(
-              color: const Color(0xFF4f46e5).withOpacity(0.25),
+              color: isDark
+                  ? const Color(0xFF4f46e5).withOpacity(0.25)
+                  : const Color(0xFF4f46e5).withOpacity(0.08),
               size: 260,
             ),
           ),
@@ -36,7 +52,9 @@ class AppBackground extends StatelessWidget {
             bottom: -160,
             left: -90,
             child: _GlowCircle(
-              color: const Color(0xFF1e40af).withOpacity(0.22),
+              color: isDark
+                  ? const Color(0xFF1e40af).withOpacity(0.22)
+                  : const Color(0xFF1e40af).withOpacity(0.06),
               size: 300,
             ),
           ),

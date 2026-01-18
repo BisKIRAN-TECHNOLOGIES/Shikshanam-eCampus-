@@ -34,5 +34,5 @@ flutter:
   uses-material-design: true
   
   # Add assets here if needed
-  # assets:
-  #   - images/
+  assets:
+    - images/
