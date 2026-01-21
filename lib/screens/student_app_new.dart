@@ -32,8 +32,8 @@ class _StudentAppState extends State<StudentApp>
     with SingleTickerProviderStateMixin {
   int _selectedIndex = 0;
   bool _isNavBarVisible = true;
-  AnimationController? _navBarAnimController;
-  Animation<Offset>? _navBarSlideAnimation;
+  late AnimationController _navBarAnimController;
+  late Animation<Offset> _navBarSlideAnimation;
 
   final List<Map<String, dynamic>> _navItems = [
     {'icon': Icons.home_outlined, 'label': 'Home'},
@@ -64,14 +64,14 @@ class _StudentAppState extends State<StudentApp>
       begin: Offset.zero,
       end: const Offset(0, 1),
     ).animate(CurvedAnimation(
-      parent: _navBarAnimController!,
+      parent: _navBarAnimController,
       curve: Curves.easeInOut,
     ));
   }
 
   @override
   void dispose() {
-    _navBarAnimController?.dispose();
+    _navBarAnimController.dispose();
     super.dispose();
   }
 
