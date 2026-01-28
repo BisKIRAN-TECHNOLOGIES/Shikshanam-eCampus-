@@ -4,8 +4,11 @@ import 'theme/app_theme.dart';
 import 'providers/app_state.dart';
 import 'screens/student_app_new.dart';
 import 'screens/admin_dashboard.dart';
+import 'screens/google_login_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
   runApp(
     ChangeNotifierProvider(
       create: (_) => AppState(),
@@ -28,7 +31,15 @@ class MyApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: appState.isDarkMode ? ThemeMode.dark : ThemeMode.light,
-          home: appState.isAdminView ? const AdminDashboard() : const StudentApp(),
+          home: appState.isLoggedIn
+              ? (appState.isAdminView
+                  ? const AdminDashboard()
+                  : const StudentApp())
+              : GoogleLoginScreen(
+                  onLoginSuccess: () {
+                    appState.setLoggedIn(true);
+                  },
+                ),
         );
       },
     );
@@ -41,15 +52,13 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final appState = Provider.of<AppState>(context);
-    
+
     return Scaffold(
       body: Stack(
         children: [
           // Main Content
-          appState.isAdminView 
-            ? const AdminDashboard() 
-            : const StudentApp(),
-          
+          appState.isAdminView ? const AdminDashboard() : const StudentApp(),
+
           // Control Panel
           Positioned(
             top: 16,
@@ -74,10 +83,12 @@ class MainScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(14),
                       ),
                       child: Icon(
-                        appState.isDarkMode ? Icons.light_mode : Icons.dark_mode,
-                        color: appState.isDarkMode 
-                          ? const Color(0xFFf97316) 
-                          : const Color(0xFF2563eb),
+                        appState.isDarkMode
+                            ? Icons.light_mode
+                            : Icons.dark_mode,
+                        color: appState.isDarkMode
+                            ? const Color(0xFFf97316)
+                            : const Color(0xFF2563eb),
                         size: 20,
                       ),
                     ),
@@ -105,12 +116,12 @@ class MainScreen extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Icon(
-                            appState.isAdminView 
-                              ? Icons.phone_android 
-                              : Icons.desktop_windows,
-                            color: appState.isAdminView 
-                              ? const Color(0xFFf97316) 
-                              : const Color(0xFF2563eb),
+                            appState.isAdminView
+                                ? Icons.phone_android
+                                : Icons.desktop_windows,
+                            color: appState.isAdminView
+                                ? const Color(0xFFf97316)
+                                : const Color(0xFF2563eb),
                             size: 20,
                           ),
                           const SizedBox(width: 8),

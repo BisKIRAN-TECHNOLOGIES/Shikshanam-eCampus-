@@ -23,12 +23,14 @@ enum StudentPage {
 class AppState extends ChangeNotifier {
   bool _isDarkMode = false;
   bool _isAdminView = false;
+  bool _isLoggedIn = false;
   StudentPage _currentPage = StudentPage.home;
   dynamic _pageData;
   int _notificationCount = 3;
 
   bool get isDarkMode => _isDarkMode;
   bool get isAdminView => _isAdminView;
+  bool get isLoggedIn => _isLoggedIn;
   StudentPage get currentPage => _currentPage;
   dynamic get pageData => _pageData;
   int get notificationCount => _notificationCount;
@@ -51,6 +53,11 @@ class AppState extends ChangeNotifier {
 
   void setNotificationCount(int count) {
     _notificationCount = count;
+    notifyListeners();
+  }
+
+  void setLoggedIn(bool value) {
+    _isLoggedIn = value;
     notifyListeners();
   }
 
