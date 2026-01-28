@@ -4,18 +4,49 @@ import 'package:provider/provider.dart';
 import '../../widgets/glassmorphic_card.dart';
 import '../../widgets/app_background.dart';
 import '../../providers/app_state.dart';
+import '../../services/google_auth_service.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final GoogleSignInService _auth = GoogleSignInService();
+  GoogleSignInAccount? _user;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUser();
+  }
+
+  Future<void> _loadUser() async {
+    try {
+      await _auth.initialize(
+        onEvent: (event) async {
+          // Update when auth events happen — refresh current account
+          final account = await _auth.getCurrentUser();
+          if (mounted) setState(() => _user = account);
+        },
+        onError: (err) => debugPrint('Auth init error in profile: $err'),
+      );
+
+      final account = await _auth.getCurrentUser();
+      if (mounted) setState(() => _user = account);
+    } catch (e) {
+      debugPrint('Failed to load user in profile: $e');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Mock user data for now since auth service structure changed
-    final mockUser = {
-      'displayName': 'Student User',
-      'email': 'student@example.com',
-      'photoUrl': null,
-    };
+    final displayName = _user?.displayName ?? 'Guest User';
+    final email = _user?.email ?? 'Not signed in';
+    final photoUrl = _user?.photoUrl;
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -44,18 +75,20 @@ class ProfileScreen extends StatelessWidget {
                             gradient: const LinearGradient(
                               colors: [Color(0xFF2563eb), Color(0xFF7c3aed)],
                             ),
-                            image: mockUser['photoUrl'] != null
+                            image: photoUrl != null
                                 ? DecorationImage(
-                                    image: NetworkImage(mockUser['photoUrl']!),
+                                    image: NetworkImage(photoUrl),
                                     fit: BoxFit.cover,
                                   )
                                 : null,
                           ),
                           alignment: Alignment.center,
-                          child: mockUser['photoUrl'] == null
+                          child: photoUrl == null
                               ? Text(
-                                  (mockUser['displayName'] ?? 'U')
-                                      .substring(0, 1)
+                                  // Guard against empty display names
+                                  (displayName.isNotEmpty
+                                          ? displayName.substring(0, 1)
+                                          : 'U')
                                       .toUpperCase(),
                                   style: const TextStyle(
                                     color: Colors.white,
@@ -69,18 +102,21 @@ class ProfileScreen extends StatelessWidget {
 
                         // Name
                         Text(
-                          mockUser['displayName'] ?? 'Guest User',
-                          style:
-                              Theme.of(context).textTheme.titleLarge?.copyWith(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.w800,
-                                  ),
+                          displayName,
+                          style: (Theme.of(context).textTheme.titleLarge ??
+                                  const TextStyle(
+                                    fontSize: 18,
+                                  ))
+                              .copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w800,
+                              ),
                         ),
                         const SizedBox(height: 6),
 
                         // Email
                         Text(
-                          mockUser['email'] ?? 'Not signed in',
+                          email,
                           style: TextStyle(
                             color: Colors.white.withOpacity(0.8),
                             fontWeight: FontWeight.w600,
@@ -151,8 +187,11 @@ class ProfileScreen extends StatelessWidget {
                           );
 
                           if (shouldLogout == true && context.mounted) {
-                            // For now, just set logged out state
-                            // TODO: Implement proper logout with new auth service
+                            try {
+                              await _auth.signOut();
+                            } catch (e) {
+                              debugPrint('SignOut failed: $e');
+                            }
                             Provider.of<AppState>(context, listen: false)
                                 .setLoggedIn(false);
                           }

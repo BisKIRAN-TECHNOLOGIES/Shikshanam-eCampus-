@@ -1,6 +1,10 @@
 buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
     dependencies {
-        classpath("com.google.gms:google-services:4.4.0")
+        // Google Services plugin removed — using manual OAuth client configuration in app code.
     }
 }
 

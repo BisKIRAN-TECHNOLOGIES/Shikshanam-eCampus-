@@ -60,7 +60,8 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
   Future<void> _initializeAuth() async {
     try {
       await _authService.initialize(
-        onAuthenticationEvent: (event) {
+        onEvent: (event) {
+          if (!mounted) return;
           setState(() {
             switch (event) {
               case GoogleSignInAuthenticationEventSignIn():
@@ -70,7 +71,7 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
                 // Auto-login if user already signed in
                 if (_currentUser != null) {
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    widget.onLoginSuccess();
+                    if (mounted) widget.onLoginSuccess();
                   });
                 }
                 break;
@@ -82,26 +83,31 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
             }
           });
         },
-        onAuthenticationError: (error) {
+        onError: (error) {
           debugPrint('🚨 AUTHENTICATION ERROR: $error');
+          if (!mounted) return;
           setState(() {
             final errorStr = error.toString();
-            if (errorStr.contains('reauth failed') || errorStr.contains('Account reauth failed')) {
-              _errorMessage = 'Account verification failed. Please check:\n\n• Google Console credentials\n• SHA-1 fingerprint\n• Internet connection\n\nTap "Show Debug Info" below for details.';
+            if (errorStr.contains('reauth failed') ||
+                errorStr.contains('Account reauth failed')) {
+              _errorMessage =
+                  'Account verification failed. Please check:\n\n• Google Console credentials\n• SHA-1 fingerprint\n• Internet connection\n\nTap "Show Debug Info" below for details.';
             } else if (errorStr.contains('canceled')) {
               _errorMessage = ''; // Don't show error for cancellation
             } else {
-              _errorMessage = 'Authentication error. Please check your internet connection and try again.';
+              _errorMessage =
+                  'Authentication error. Please check your internet connection and try again.';
             }
           });
         },
       );
-      
+
       debugPrint('🔧 GOOGLE SIGN-IN CONFIGURATION:');
-      debugPrint('Client ID: 462381335611-65kl9i78fdss06lvq6cof6mqssqvt6pi.apps.googleusercontent.com');
-      debugPrint('Server Client ID: 462381335611-f5al04d6pusp5kml8j89fmkr3mnqekmd.apps.googleusercontent.com');
+      debugPrint(
+          'Client ID: 462381335611-65kl9i78fdss06lvq6cof6mqssqvt6pi.apps.googleusercontent.com');
+      debugPrint(
+          'Server Client ID: 462381335611-f5al04d6pusp5kml8j89fmkr3mnqekmd.apps.googleusercontent.com');
       debugPrint('Platform: ${Theme.of(context).platform}');
-      
     } catch (e) {
       debugPrint('🚨 INITIALIZATION ERROR: $e');
       setState(() {
@@ -126,21 +132,25 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
 
     try {
       await _authService.authenticate();
-      
+
       // The authentication event will handle the success case
       // If we reach here without error, the event handler will trigger navigation
     } catch (e) {
       final errorStr = e.toString();
-      
+
       if (errorStr.contains('canceled')) {
         // User cancelled - don't show error
         debugPrint('User cancelled sign-in');
-      } else if (errorStr.contains('reauth failed') || errorStr.contains('Account reauth failed')) {
-        _showError('Account verification failed. This might be due to:\n\n• Outdated Google Play Services\n• App configuration issue\n• Network connectivity\n\nPlease try again or restart the app.');
+      } else if (errorStr.contains('reauth failed') ||
+          errorStr.contains('Account reauth failed')) {
+        _showError(
+            'Account verification failed. This might be due to:\n\n• Outdated Google Play Services\n• App configuration issue\n• Network connectivity\n\nPlease try again or restart the app.');
       } else if (errorStr.contains('network')) {
-        _showError('Network error. Please check your internet connection and try again.');
+        _showError(
+            'Network error. Please check your internet connection and try again.');
       } else {
-        _showError('Sign-in failed. Please try again or contact support if this issue persists.');
+        _showError(
+            'Sign-in failed. Please try again or contact support if this issue persists.');
       }
     } finally {
       if (mounted) {
@@ -254,21 +264,21 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
                     child: _buildGoogleSignInButton(isDark),
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Features Section
                   FadeTransition(
                     opacity: _fadeAnimation,
                     child: _buildFeaturesSection(isDark),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Footer
                   FadeTransition(
                     opacity: _fadeAnimation,
                     child: _buildFooter(),
                   ),
-                  
+
                   const SizedBox(height: 40),
                 ],
               ),
@@ -371,58 +381,58 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
         ),
         const SizedBox(height: 20),
         ...features.map((feature) => Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: Colors.white.withOpacity(0.2),
-              ),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.15),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
                     color: Colors.white.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    feature['icon'] as IconData,
-                    color: Colors.white,
-                    size: 20,
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        feature['title'] as String,
-                        style: GoogleFonts.inter(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                      Text(
-                        feature['subtitle'] as String,
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          color: Colors.white.withOpacity(0.8),
-                        ),
+                      child: Icon(
+                        feature['icon'] as IconData,
+                        color: Colors.white,
+                        size: 20,
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            feature['title'] as String,
+                            style: GoogleFonts.inter(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                          Text(
+                            feature['subtitle'] as String,
+                            style: GoogleFonts.inter(
+                              fontSize: 12,
+                              color: Colors.white.withOpacity(0.8),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
-        )),
+              ),
+            )),
       ],
     );
   }
@@ -447,7 +457,7 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
           ),
         ),
         const SizedBox(height: 16),
-        if (_errorMessage.isNotEmpty)...[
+        if (_errorMessage.isNotEmpty) ...[
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -479,12 +489,14 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
                   children: [
                     Expanded(
                       child: TextButton.icon(
-                        onPressed: _isLoading ? null : () {
-                          setState(() {
-                            _errorMessage = '';
-                          });
-                          _handleGoogleSignIn();
-                        },
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                setState(() {
+                                  _errorMessage = '';
+                                });
+                                _handleGoogleSignIn();
+                              },
                         icon: Icon(
                           Icons.refresh,
                           size: 16,
@@ -499,7 +511,8 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
                           ),
                         ),
                         style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
                           backgroundColor: Colors.red.withOpacity(0.1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -519,7 +532,9 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
                           });
                         },
                         icon: Icon(
-                          _showDebugInfo ? Icons.visibility_off : Icons.bug_report,
+                          _showDebugInfo
+                              ? Icons.visibility_off
+                              : Icons.bug_report,
                           size: 16,
                           color: Colors.blue[300],
                         ),
@@ -532,7 +547,8 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
                           ),
                         ),
                         style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
                           backgroundColor: Colors.blue.withOpacity(0.1),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(8),
@@ -581,9 +597,12 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
                     ],
                   ),
                   const SizedBox(height: 12),
-                  _buildDebugItem('Android Client ID', '462381335611-65kl9i78fdss06lvq6cof6mqssqvt6pi.apps.googleusercontent.com'),
-                  _buildDebugItem('Web Client ID (Server)', '462381335611-f5al04d6pusp5kml8j89fmkr3mnqekmd.apps.googleusercontent.com'),
-                  _buildDebugItem('SHA-1 Fingerprint', 'B8:00:43:CD:C2:CE:CD:6C:9D:D2:98:C8:95:4B:75:A3:A3:76:31:84'),
+                  _buildDebugItem('Android Client ID',
+                      '462381335611-65kl9i78fdss06lvq6cof6mqssqvt6pi.apps.googleusercontent.com'),
+                  _buildDebugItem('Web Client ID (Server)',
+                      '462381335611-f5al04d6pusp5kml8j89fmkr3mnqekmd.apps.googleusercontent.com'),
+                  _buildDebugItem('SHA-1 Fingerprint',
+                      'B8:00:43:CD:C2:CE:CD:6C:9D:D2:98:C8:95:4B:75:A3:A3:76:31:84'),
                   _buildDebugItem('Package Name', 'com.example.nepal_loksewa'),
                   _buildDebugItem('Platform', Theme.of(context).platform.name),
                   const SizedBox(height: 8),
