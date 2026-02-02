@@ -1,4 +1,4 @@
-package com.example.nepal_loksewa
+package com.biskirantechnologies.sikshanam
 
 import io.flutter.embedding.android.FlutterActivity
 
