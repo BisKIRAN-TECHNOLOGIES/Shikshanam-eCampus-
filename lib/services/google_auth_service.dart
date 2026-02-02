@@ -11,9 +11,9 @@ class GoogleSignInService {
   GoogleSignInService();
 
   static const String androidClientId =
-      '462381335611-65kl9i78fdss06lvq6cof6mqssqvt6pi.apps.googleusercontent.com';
+      '477896799991-ebtrhl7gds5h4v5j6tao2nimpsgb8k7q.apps.googleusercontent.com';
   static const String webClientId =
-      '462381335611-f5al04d6pusp5kml8j89fmkr3mnqekmd.apps.googleusercontent.com';
+      '477896799991-4d8gf8qt8bpmcf5jqkgjhsp741cvt5eo.apps.googleusercontent.com';
 
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   StreamSubscription<GoogleSignInAuthenticationEvent>? _authSubscription;
@@ -34,9 +34,16 @@ class GoogleSignInService {
     if (_initialized) return;
 
     try {
+      final effectiveClientId = clientId ?? (kIsWeb ? webClientId : androidClientId);
+      final effectiveServerClientId = serverClientId ?? webClientId;
+      
+      debugPrint('🔍 Google Sign-In Platform: ${kIsWeb ? 'WEB' : 'MOBILE'}');
+      debugPrint('🔑 Client ID: $effectiveClientId');
+      debugPrint('🔑 Server Client ID: $effectiveServerClientId');
+      
       await _googleSignIn.initialize(
-        clientId: clientId ?? (kIsWeb ? webClientId : androidClientId),
-        serverClientId: serverClientId ?? webClientId,
+        clientId: effectiveClientId,
+        serverClientId: effectiveServerClientId,
       );
 
       _authSubscription = _googleSignIn.authenticationEvents.listen(
@@ -52,17 +59,27 @@ class GoogleSignInService {
         onError: onError,
       );
       _initialized = true;
-      debugPrint('Google Sign-In initialized successfully');
+      debugPrint('✅ Google Sign-In initialized successfully');
     } catch (e) {
-      debugPrint('Google Sign-In initialization failed: $e');
+      debugPrint('❌ Google Sign-In initialization failed: $e');
       rethrow;
     }
   }
 
   /// Trigger the explicit authentication UI flow.
+  /// On web, skips authentication as renderButton is recommended.
+  /// On mobile, uses authenticate() for native auth UI.
   Future<void> authenticate() async {
     try {
-      await _googleSignIn.authenticate();
+      if (kIsWeb) {
+        // Web platform: authenticate() is not supported, use renderButton in UI instead
+        debugPrint('Web platform detected: renderButton should be used in UI instead');
+        throw UnsupportedError('Use renderButton widget for web authentication');
+      } else {
+        // Mobile platforms: use authenticate()
+        debugPrint('Mobile platform detected: using authenticate()');
+        await _googleSignIn.authenticate();
+      }
     } catch (e) {
       debugPrint('Google Sign-In authentication error: $e');
       rethrow;
@@ -70,12 +87,12 @@ class GoogleSignInService {
   }
 
   /// Convenience explicit sign-in (returns the account or null).
+  /// This uses the event-based authentication flow.
   Future<GoogleSignInAccount?> signIn() async {
     try {
-      // Use authenticate() to present auth UI. The authentication event
-      // listener (if attached) will receive the resulting sign-in event.
-      await _googleSignIn.authenticate();
-      return null;
+      // Trigger authentication which will emit events
+      await authenticate();
+      return _lastAccount;
     } catch (e) {
       debugPrint('Google Sign-In signIn error: $e');
       rethrow;

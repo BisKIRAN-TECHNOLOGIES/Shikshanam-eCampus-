@@ -131,16 +131,28 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
     });
 
     try {
-      await _authService.authenticate();
+      if (Theme.of(context).platform == TargetPlatform.windows ||
+          Theme.of(context).platform == TargetPlatform.linux ||
+          Theme.of(context).platform == TargetPlatform.macOS) {
+        // For web/desktop, show appropriate message
+        _showError(
+            'Sign-in is not available on this platform. Please use a mobile device or ensure proper configuration.');
+      } else {
+        await _authService.authenticate();
+      }
 
       // The authentication event will handle the success case
       // If we reach here without error, the event handler will trigger navigation
     } catch (e) {
       final errorStr = e.toString();
 
-      if (errorStr.contains('canceled')) {
+      if (errorStr.contains('canceled') || errorStr.contains('popup_closed')) {
         // User cancelled - don't show error
         debugPrint('User cancelled sign-in');
+      } else if (errorStr.contains('UnsupportedError') ||
+          errorStr.contains('renderButton')) {
+        _showError(
+            'Web sign-in requires renderButton widget. Please refresh and try again.');
       } else if (errorStr.contains('reauth failed') ||
           errorStr.contains('Account reauth failed')) {
         _showError(
@@ -603,7 +615,7 @@ class _GoogleLoginScreenState extends State<GoogleLoginScreen>
                       '462381335611-f5al04d6pusp5kml8j89fmkr3mnqekmd.apps.googleusercontent.com'),
                   _buildDebugItem('SHA-1 Fingerprint',
                       'B8:00:43:CD:C2:CE:CD:6C:9D:D2:98:C8:95:4B:75:A3:A3:76:31:84'),
-                  _buildDebugItem('Package Name', 'com.example.nepal_loksewa'),
+                  _buildDebugItem('Package Name', 'com.biskirantechnologies.sikshanam'),
                   _buildDebugItem('Platform', Theme.of(context).platform.name),
                   const SizedBox(height: 8),
                   Container(
